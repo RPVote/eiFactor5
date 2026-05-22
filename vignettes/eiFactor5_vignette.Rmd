@@ -1,0 +1,265 @@
+---
+title: "Factor 5 Analysis with eiFactor5"
+subtitle: "Totality of Circumstances SES Disparities by Race/Ethnicity"
+author: "Loren Collingwood"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Factor 5 Analysis with eiFactor5}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Introduction
+
+The `eiFactor5` package retrieves American Community Survey (ACS) data from
+the U.S. Census Bureau and computes socioeconomic status (SES) indicators by
+racial/ethnic group for Voting Rights Act Section 2 "totality of
+circumstances" Factor 5 analysis.
+
+Under the *Gingles* framework, Factor 5 of the "totality of circumstances"
+test examines whether members of the minority group bear the effects of
+discrimination in areas such as education, employment, and health, which
+hinder their ability to participate effectively in the political process.
+
+The package computes 12 SES indicators across up to five racial/ethnic groups
+(White, Black, Hispanic, AAPI, and Native American), providing
+publication-ready comparison tables, statistical significance testing, bar
+charts, and choropleth maps.
+
+## Setup
+
+First, install the package and set your Census API key. You can obtain a free
+key at [https://api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
+
+```{r install}
+# install.packages("devtools")
+devtools::install_github("RPVote/eiFactor5")
+```
+
+```{r api-key}
+library(eiFactor5)
+library(tidycensus)
+
+# Set your Census API key (only needed once per session)
+census_api_key("YOUR_KEY_HERE")
+```
+
+## Available Indicators
+
+The package computes 12 SES indicators:
+
+```{r indicators, eval = TRUE}
+library(eiFactor5)
+knitr::kable(f5_indicators()[, c("id", "label", "acs_table")])
+```
+
+## Example 1: New Mexico Statewide Analysis
+
+Compare Native American, Hispanic, and White populations across all New
+Mexico counties.
+
+### Fetch Data
+
+```{r nm-fetch}
+nm_dat <- f5_fetch(
+  state = "NM",
+  geography = "county",
+  year = 2022,
+  groups = c("white", "hispanic", "native")
+)
+head(nm_dat[, c("NAME", "pct_white", "pct_hispanic", "pct_native")])
+```
+
+### Comparison Table
+
+```{r nm-table}
+nm_table <- f5_table(
+  nm_dat,
+  ref_group = "white",
+  compare_groups = c("hispanic", "native")
+)
+knitr::kable(nm_table, caption = "Factor 5 SES Comparison: New Mexico Counties")
+```
+
+### Statistical Tests
+
+```{r nm-compare}
+# Detailed pairwise comparison: White vs Native
+nm_native <- f5_compare(nm_dat,
+                        ref_group = "white",
+                        compare_group = "native")
+knitr::kable(nm_native[, c("label", "ref_mean", "compare_mean",
+                            "diff", "t_stat", "p_value", "significant")],
+             digits = 3,
+             caption = "White vs. Native American: Pairwise Tests")
+```
+
+### Bar Chart
+
+```{r nm-plot, fig.width = 8, fig.height = 6}
+f5_plot(nm_dat,
+        ref_group = "white",
+        compare_groups = c("hispanic", "native"),
+        type = "bar")
+```
+
+### Dot Plot
+
+```{r nm-dot, fig.width = 8, fig.height = 6}
+f5_plot(nm_dat,
+        ref_group = "white",
+        compare_groups = c("hispanic", "native"),
+        type = "dot")
+```
+
+## Example 2: Northern New Mexico Regional Analysis
+
+Focus on northern New Mexico counties with significant Native American and
+Hispanic populations: Santa Fe, Rio Arriba, Taos, San Juan, McKinley,
+Sandoval, Los Alamos, and Colfax counties.
+
+### Fetch Tract-Level Data
+
+```{r north-nm-fetch}
+north_nm_counties <- c("049", "039", "055", "045", "031", "043", "028", "007")
+
+north_dat <- f5_fetch(
+  state = "NM",
+  county = north_nm_counties,
+  geography = "tract",
+  year = 2022,
+  groups = c("white", "hispanic", "native"),
+  geometry = TRUE
+)
+
+message("Retrieved ", nrow(north_dat), " tracts across 8 counties")
+```
+
+### Comparison Table
+
+```{r north-table}
+north_table <- f5_table(
+  north_dat,
+  ref_group = "white",
+  compare_groups = c("hispanic", "native")
+)
+knitr::kable(north_table,
+             caption = "Factor 5 SES Comparison: Northern NM Tracts")
+```
+
+### Choropleth Maps
+
+Map the poverty rate for Native Americans across northern NM tracts:
+
+```{r north-map-poverty, fig.width = 8, fig.height = 6}
+f5_map(north_dat,
+       indicator = "pct_below_poverty",
+       group = "native",
+       title = "Native American Poverty Rate\nNorthern New Mexico")
+```
+
+Map educational attainment for Hispanics:
+
+```{r north-map-education, fig.width = 8, fig.height = 6}
+f5_map(north_dat,
+       indicator = "pct_less_hs",
+       group = "hispanic",
+       title = "Hispanic Pct. Less than HS Diploma\nNorthern New Mexico")
+```
+
+Map unemployment for White population as a comparison:
+
+```{r north-map-unemp, fig.width = 8, fig.height = 6}
+f5_map(north_dat,
+       indicator = "pct_unemployed",
+       group = "white",
+       title = "White Unemployment Rate\nNorthern New Mexico")
+```
+
+### Bar Chart: Northern NM
+
+```{r north-bar, fig.width = 8, fig.height = 6}
+f5_plot(north_dat,
+        ref_group = "white",
+        compare_groups = c("hispanic", "native"),
+        type = "bar")
+```
+
+## Example 3: Mississippi White vs. Black
+
+A classic Factor 5 analysis comparing White and Black populations in
+Mississippi at the county level.
+
+```{r ms-fetch}
+ms_dat <- f5_fetch(
+  state = "MS",
+  geography = "county",
+  year = 2022,
+  groups = c("white", "black")
+)
+```
+
+```{r ms-table}
+ms_table <- f5_table(ms_dat, ref_group = "white", compare_groups = "black")
+knitr::kable(ms_table, caption = "Factor 5: Mississippi, White vs. Black")
+```
+
+```{r ms-plot, fig.width = 8, fig.height = 6}
+f5_plot(ms_dat, ref_group = "white", compare_groups = "black")
+```
+
+## Example 4: National State-Level Comparison
+
+Compare all five racial/ethnic groups at the state level across the entire
+United States.
+
+```{r national}
+us_dat <- f5_fetch(
+  geography = "state",
+  year = 2022,
+  groups = c("white", "black", "hispanic", "aapi", "native")
+)
+
+us_table <- f5_table(
+  us_dat,
+  ref_group = "white",
+  compare_groups = c("black", "hispanic", "aapi", "native")
+)
+knitr::kable(us_table, caption = "Factor 5: National, State-Level")
+```
+
+## Interpreting Results
+
+In Factor 5 analysis for VRA Section 2 litigation:
+
+- **Income indicators**: Lower median household income and lower rates of
+  high-income households among minority groups indicate economic disparities.
+- **Poverty indicators**: Higher poverty rates (overall, children, adults)
+  for minority groups show the effects of discrimination on economic status.
+- **Education indicators**: Higher rates of less-than-HS education and lower
+  rates of bachelor's degrees indicate educational disparities.
+- **Employment**: Higher unemployment rates among minority groups.
+- **Disability & Health**: Higher disability rates and lack of health
+  insurance indicate health-related disparities.
+- **Statistical significance**: The t-test p-values indicate whether
+  observed differences are statistically significant (p < 0.05).
+
+These disparities, when present, support the argument that minority group
+members bear the effects of discrimination in areas that hinder effective
+political participation.
+
+## Citation
+
+If you use this package in academic work, please cite:
+
+> Collingwood, L. (2026). eiFactor5: Totality of Circumstances Factor 5
+> Analysis Using Census ACS Data. R package version 1.0.0.
+> https://github.com/RPVote/eiFactor5

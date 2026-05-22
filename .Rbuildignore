@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^georgia_code$
+^eiFactor5\.R$
+^acs_vars\.R$
+^acs_vars 2\.R$
+^ses_analysis\.R$
+^factor5_ga_hispanic_asian\.R$
+^function_example\.R$
+^assignment_4\.Rmd$
+^README\.md$
+^\.gitignore$

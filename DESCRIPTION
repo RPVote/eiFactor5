@@ -1,0 +1,38 @@
+Package: eiFactor5
+Title: Totality of Circumstances Factor 5 Analysis Using Census ACS Data
+Version: 1.0.0
+Authors@R: c(
+    person("Loren", "Collingwood", email = "lcollingwood@unm.edu",
+           role = c("aut", "cre")),
+    person("Rachel", "Carroll", role = "ctb"))
+Description: Retrieves American Community Survey (ACS) data via the Census API
+    and computes socioeconomic status (SES) indicators by racial/ethnic group for
+    Voting Rights Act Section 2 "totality of circumstances" Factor 5 analysis.
+    Supports comparisons across White, Black, Hispanic, AAPI, and Native American
+    populations at national, state, county, tract, and congressional district
+    levels. Provides publication-ready comparison tables with statistical
+    significance testing, bar/dot chart visualizations, and choropleth maps.
+    Part of the eiCompare ecosystem for voting rights analysis.
+License: GPL-3
+URL: https://github.com/RPVote/eiFactor5
+BugReports: https://github.com/RPVote/eiFactor5/issues
+Depends:
+    R (>= 4.0)
+Imports:
+    tidycensus,
+    dplyr,
+    tidyr,
+    ggplot2,
+    sf,
+    tigris,
+    stats,
+    rlang
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3
