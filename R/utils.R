@@ -20,7 +20,8 @@ fmt_pct <- function(x, digits = 1) {
 #' @keywords internal
 fmt_dollar <- function(x, digits = 0) {
   ifelse(is.na(x), "NA", paste0("$", formatC(round(x, digits),
-    format = "f", digits = digits, big.mark = ",")))
+    format = "f", digits = digits, big.mark = ","
+  )))
 }
 
 #' Map group labels to display names
@@ -40,22 +41,26 @@ group_display_name <- function(group) {
 #' @keywords internal
 indicator_meta <- function() {
   data.frame(
-    id = c("med_hh_inc", "pct_hh_inc_100k", "pct_hh_inc_125k",
-           "pct_snap", "pct_below_poverty", "pct_below_poverty_child",
-           "pct_below_poverty_adult", "pct_less_hs", "pct_bachelor",
-           "pct_unemployed", "pct_disabled", "pct_uninsured"),
-    label = c("Median Household Income",
-              "Pct. HH Income > $100K",
-              "Pct. HH Income > $125K",
-              "Pct. Receiving SNAP",
-              "Pct. Below Poverty Line",
-              "Pct. Below Poverty (Children)",
-              "Pct. Below Poverty (Adults)",
-              "Pct. Less than HS Diploma",
-              "Pct. Bachelor's Degree+",
-              "Pct. Unemployed (16-64)",
-              "Pct. Disabled (18-64)",
-              "Pct. Uninsured (19-64)"),
+    id = c(
+      "med_hh_inc", "pct_hh_inc_100k", "pct_hh_inc_125k",
+      "pct_snap", "pct_below_poverty", "pct_below_poverty_child",
+      "pct_below_poverty_adult", "pct_less_hs", "pct_bachelor",
+      "pct_unemployed", "pct_disabled", "pct_uninsured"
+    ),
+    label = c(
+      "Median Household Income",
+      "Pct. HH Income > $100K",
+      "Pct. HH Income > $125K",
+      "Pct. Receiving SNAP",
+      "Pct. Below Poverty Line",
+      "Pct. Below Poverty (Children)",
+      "Pct. Below Poverty (Adults)",
+      "Pct. Less than HS Diploma",
+      "Pct. Bachelor's Degree+",
+      "Pct. Unemployed (16-64)",
+      "Pct. Disabled (18-64)",
+      "Pct. Uninsured (19-64)"
+    ),
     summary_type = c("median", rep("proportion", 11)),
     stringsAsFactors = FALSE
   )

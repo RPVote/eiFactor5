@@ -36,9 +36,11 @@
 #' f5_table(dat, ref_group = "white", compare_groups = "black")
 #'
 #' # Multiple comparison groups, select indicators
-#' f5_table(dat, ref_group = "white",
-#'          compare_groups = c("black", "hispanic"),
-#'          indicators = c("med_hh_inc", "pct_below_poverty", "pct_bachelor"))
+#' f5_table(dat,
+#'   ref_group = "white",
+#'   compare_groups = c("black", "hispanic"),
+#'   indicators = c("med_hh_inc", "pct_below_poverty", "pct_bachelor")
+#' )
 #' }
 #'
 #' @export
@@ -47,15 +49,16 @@ f5_table <- function(data,
                      ref_group = "white",
                      compare_groups = NULL,
                      indicators = NULL) {
-
   groups <- attr(data, "groups")
   if (is.null(groups)) {
     stop("'data' must be output from f5_fetch() with group metadata.")
   }
 
   if (!ref_group %in% groups) {
-    stop("ref_group '", ref_group, "' not found in data. ",
-         "Available groups: ", paste(groups, collapse = ", "))
+    stop(
+      "ref_group '", ref_group, "' not found in data. ",
+      "Available groups: ", paste(groups, collapse = ", ")
+    )
   }
 
   if (is.null(compare_groups)) {

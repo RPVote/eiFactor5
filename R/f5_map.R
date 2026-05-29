@@ -19,9 +19,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' dat <- f5_fetch(state = "NM", county = c("049","039","055"),
-#'                 geography = "tract", geometry = TRUE,
-#'                 groups = c("white", "native"))
+#' dat <- f5_fetch(
+#'   state = "NM", county = c("049", "039", "055"),
+#'   geography = "tract", geometry = TRUE,
+#'   groups = c("white", "native")
+#' )
 #' f5_map(dat, indicator = "pct_below_poverty", group = "native")
 #' }
 #'
@@ -32,15 +34,16 @@ f5_map <- function(data,
                    group,
                    title = NULL,
                    palette = "viridis") {
-
   if (!inherits(data, "sf")) {
     stop("'data' must have geometry. Use f5_fetch(..., geometry = TRUE).")
   }
 
   col_name <- paste0(indicator, "_", group)
   if (!col_name %in% names(data)) {
-    stop("Column '", col_name, "' not found in data. ",
-         "Check indicator and group names.")
+    stop(
+      "Column '", col_name, "' not found in data. ",
+      "Check indicator and group names."
+    )
   }
 
   meta <- indicator_meta()
@@ -60,7 +63,8 @@ f5_map <- function(data,
 
   p <- ggplot2::ggplot(data) +
     ggplot2::geom_sf(ggplot2::aes(fill = .data[[col_name]]),
-                     color = "white", size = 0.1) +
+      color = "white", size = 0.1
+    ) +
     ggplot2::labs(
       title = title,
       subtitle = subtitle,
@@ -82,8 +86,12 @@ f5_map <- function(data,
   } else {
     p <- p + ggplot2::scale_fill_viridis_c(
       option = palette,
-      labels = function(x) paste0("$", formatC(x, format = "f",
-                                                digits = 0, big.mark = ",")),
+      labels = function(x) {
+        paste0("$", formatC(x,
+          format = "f",
+          digits = 0, big.mark = ","
+        ))
+      },
       na.value = "grey80"
     )
   }

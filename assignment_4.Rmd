@@ -1,0 +1,1454 @@
+---
+title: "Assignment 4"
+author: "David Lopez Amaya"
+date: "2023-04-16"
+output: html_document
+---
+
+
+1. For the state of New Mexico, generate a dataset that reports out the following variables
+for the non-Hispanic white, Hispanic, and Native American: Pct. White, Pct. Hispanic,
+Pct. Native, below is a list of variable from the script * indicates filler for the three race groups above.
+    med_hh_inc_*,
+    pct_hh_inc_*_ 100p, pct_hh_inc_*_p,
+    pct_snap_*,
+    pct_*_below_poverty,
+    pct_*_below_poverty_child, pct_*_below_poverty_adult,
+    pct_educ_less_hs_*, pct_educ_bacherlor_*,
+    pct_unemployed_*,
+    pct_disabled_*,
+    pct_uninsure_*_19_64
+    
+    
+Establish Source Code ACS Vars:
+
+
+```{r}
+acs_vars <- c(# Median HH Income #
+              "B19013_001",  # Median HH Income
+              
+              "B01003_001",  # Total Pop
+              "B03002_012",  # Hispanic/Latino
+              
+              # Median Household Income, Hispanic/Latino #
+              "B19013I_001", # Median Hispanic/Latino
+              
+              # Household Income, Hispanic/Latino #
+              "B19001_001",  # Income total households
+              "B19001I_001", # Income total Hispanic/Latino households 
+              "B19001I_014", # HH income Hispanic/Latino > 100,000 to $124,999
+              "B19001I_015", # HH income Hispanic/Latino 125,000 to $149,999
+              "B19001I_016", # HH income Hispanic/Latino 150,000 to $199,999
+              "B19001I_017", # HH income Hispanic/Latino 200,000 or more
+              
+              # SNAP, Hispanic/Latino #
+              "B22005I_002", # Snap Hispanic/Latino
+              "B22005I_001", # Snap Hispanic/Latino Denominator  
+              
+              # Poverty Status, Hispanic/Latino #
+              "B17001I_001", # POVERTY STATUS (Hispanic/Latino) # Denominator
+              "B17001I_002", # Income Below poverty level (Hispanic/Latino)
+              
+              # Total Hispanic/Latino #
+              "B17001I_001", # Estimate!!Total: POVERTY STATUS IN THE PAST 12 MONTHS BY SEX BY AGE (WHITE ALONE, NOT HISPANIC OR LATINO)
+              
+              # Poverty Status, Hispanic/Latino Men #
+              "B17001I_004",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+              "B17001I_005",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+              "B17001I_006",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+              "B17001I_007",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+              "B17001I_008",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+              "B17001I_009",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+              "B17001I_010",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+              "B17001I_011",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+              "B17001I_012",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+              "B17001I_013",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+              "B17001I_014",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+              "B17001I_015",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+              "B17001I_016",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+              
+              # At or Above Poverty status Hispanic/Latino Men (use this to combine with above for Denominator)
+              "B17001I_033",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+              "B17001I_034",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+              "B17001I_035",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+              "B17001I_036",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+              "B17001I_037",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+              "B17001I_038",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+              "B17001I_039",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+              "B17001I_040",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+              "B17001I_041",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+              "B17001I_042",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+              "B17001I_043",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+              "B17001I_044",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+              "B17001I_045",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+              
+              # Poverty Status, Hispanic/Latino Women #
+              "B17001I_018",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+              "B17001I_019",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+              "B17001I_020",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+              "B17001I_021",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+              "B17001I_022",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+              "B17001I_023",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+              "B17001I_024",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+              "B17001I_025",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+              "B17001I_026",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+              "B17001I_027",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+              "B17001I_028",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+              "B17001I_029",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+              "B17001I_030",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over
+              
+              # At or Above Poverty status Hispanic/Latino Women (use this to combine with above for Denominator)              
+              "B17001I_047",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+              "B17001I_048",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+              "B17001I_049",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+              "B17001I_050",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+              "B17001I_051",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+              "B17001I_052",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+              "B17001I_053",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+              "B17001I_054",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+              "B17001I_055",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+              "B17001I_056",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+              "B17001I_057",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+              "B17001I_058",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+              "B17001I_059",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over              
+              
+              # Educational Attainment, Hispanic/Latino #
+              
+              # Total Hispanic/Latino #
+              "C15002I_001",	# Estimate!!Total:	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Hispanic/Latino Men #
+              "C15002I_003",	# Estimate!!Total:!!Male:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (HISPANIC OR LATINO)
+              "C15002I_006",	# Estimate!!Total:!!Male:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Hispanic/Latino Women #
+              "C15002I_008",	# Estimate!!Total:!!Female:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (HISPANIC OR LATINO)
+              "C15002I_011",  # Estimate!!Total:!!Female:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Employment Status, Hispanic/Latino #
+              
+              # Civilian Employment Status 16-64 (In labor force), Hispanic/Latino Men #
+              "C23002I_006", 	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Employed vs Unemployed #
+              "C23002I_008",	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Civilian Employment Status 16-64, Hispanic/Latino Women #
+              "C23002I_019",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (HISPANIC OR LATINO)                
+              
+              # Employed vs Unemployed #
+              "C23002I_021",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (HISPANIC OR LATINO)
+              
+              # Disability Status, Hispanic/Latino # 
+              
+              # Disability status, ages 18-64 Hispanic/Latino
+              "B18101I_005",	# Estimate!!Total:!!18 to 64 years:	AGE BY DISABILITY STATUS (HISPANIC OR LATINO)
+              "B18101I_006",	# Estimate!!Total:!!18 to 64 years:!!With a disability	AGE BY DISABILITY STATUS (HISPANIC OR LATINO)
+              
+              # Insurance Status, Hispanic/Latino #
+              
+              # Health Insurance Coverage Hispanic/Latino, by Age #
+              "C27001I_001",	# Estimate!!Total:	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_002",	# Estimate!!Total:!!Under 19 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_004",	# Estimate!!Total:!!Under 19 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_005",	# Estimate!!Total:!!19 to 64 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_007",	# Estimate!!Total:!!19 to 64 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_008",	# Estimate!!Total:!!65 years and over:	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+              "C27001I_010",	# Estimate!!Total:!!65 years and over:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (HISPANIC OR LATINO)
+
+              "B01003_001",  # Total Pop
+              "B03002_005",   # Native
+              
+              # Median Household Income, Native #
+              "B19013C_001", # Median White alone Native
+              
+              # Household Income, White #
+              "B19001_001",  # Income total households
+              "B19001C_001", # Income total white households 
+              "B19001C_014", # HH income Native > 100,000 to $124,999
+              "B19001C_015", # HH income Native 125,000 to $149,999
+              "B19001C_016", # HH income Native 150,000 to $199,999
+              "B19001C_017", # HH income Native 200,000 or more
+              
+              # SNAP, Native #
+              "B22005C_002", # Snap Native
+              "B22005C_001", # Snap Native Denominator 
+              
+              # Poverty Status, Native # 
+              "B17001C_001", # POVERTY STATUS (Native) # Denominator
+              "B17001C_002", # Income Below poverty level (Native)
+              
+              # Total Native #
+              "B17001C_001", # Estimate!!Total: POVERTY STATUS IN THE PAST 12 MONTHS BY SEX BY AGE (NATIVE)
+              
+              # Poverty Status, Native Men #
+              "B17001C_004",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+              "B17001C_005",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+              "B17001C_006",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+              "B17001C_007",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+              "B17001C_008",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+              "B17001C_009",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+              "B17001C_010",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+              "B17001C_011",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+              "B17001C_012",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+              "B17001C_013",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+              "B17001C_014",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+              "B17001C_015",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+              "B17001C_016",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+              
+              # At or Above Poverty status Native Men (use this to combine with above for Denominator)
+              "B17001C_032",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:
+              "B17001C_033",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+              "B17001C_034",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+              "B17001C_035",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+              "B17001C_036",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+              "B17001C_037",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+              "B17001C_038",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+              "B17001C_039",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+              "B17001C_040",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+              "B17001C_041",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+              "B17001C_042",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+              "B17001C_043",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+              "B17001C_044",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+              "B17001C_045",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+              
+              # Poverty Status, Native Women #
+              "B17001C_018",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+              "B17001C_019",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+              "B17001C_020",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+              "B17001C_021",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+              "B17001C_022",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+              "B17001C_023",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+              "B17001C_024",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+              "B17001C_025",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+              "B17001C_026",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+              "B17001C_027",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+              "B17001C_028",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+              "B17001C_029",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+              "B17001C_030",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over
+              
+              # At or Above Poverty status Native Women (use this to combine with above for Denominator)
+              "B17001C_047",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+              "B17001C_048",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+              "B17001C_049",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+              "B17001C_050",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+              "B17001C_051",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+              "B17001C_052",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+              "B17001C_053",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+              "B17001C_054",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+              "B17001C_055",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+              "B17001C_056",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+              "B17001C_057",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+              "B17001C_058",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+              "B17001C_059",  #Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over
+              
+              # Educational Attainment, Native #
+              
+              # Total Native #
+              "C15002C_001",	# Estimate!!Total:	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (Native)
+              
+              # Native Men #
+              "C15002C_003",	# Estimate!!Total:!!Male:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (Native)
+              "C15002C_006",	# Estimate!!Total:!!Male:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (Native)
+              
+              # Native Women #
+              "C15002C_008",	# Estimate!!Total:!!Female:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (Native)
+              "C15002C_011",  # Estimate!!Total:!!Female:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (Native)
+              
+              # Employment Status, Native #
+              
+              # Civilian Employment Status 16-64 (In labor force), Native Men #
+              "C23002C_006", 	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (Native)
+              
+              # Employed vs Unemployed #
+              "C23002C_008",	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (Native)
+              
+              # Civilian Employment Status 16-64, Native Women #
+              "C23002C_019",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (Native)                
+              
+              # Employed vs Unemployed #
+              "C23002C_021",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (Native)
+              
+              # Disability Status, Native # 
+              
+              # Disability status, ages 18-64 Native
+              "B18101C_005",	# Estimate!!Total:!!18 to 64 years:	AGE BY DISABILITY STATUS (NATIVE)
+              "B18101C_006",	# Estimate!!Total:!!18 to 64 years:!!With a disability	AGE BY DISABILITY STATUS (NATIVE)
+              
+              # Insurance Status, Native #
+              
+              # Health Insurance Coverage Native, by Age #
+              "C27001C_001",	# Estimate!!Total:	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_002",	# Estimate!!Total:!!Under 19 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_004",	# Estimate!!Total:!!Under 19 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_005",	# Estimate!!Total:!!19 to 64 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_007",	# Estimate!!Total:!!19 to 64 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_008",	# Estimate!!Total:!!65 years and over:	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+              "C27001C_010",	# Estimate!!Total:!!65 years and over:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (Native)
+
+              "B01003_001",  # Total Pop
+              "B03002_003",  # White NH
+              
+              # Median Household Income, White #
+              "B19013H_001", # Median White alone NH
+              
+              # Household Income, White #
+              "B19001_001",  # Income total households
+              "B19001H_001", # Income total white households 
+              "B19001H_014", # HH income white > 100,000 to $124,999
+              "B19001H_015", # HH income white 125,000 to $149,999
+              "B19001H_016", # HH income white 150,000 to $199,999
+              "B19001H_017", # HH income white 200,000 or more
+              
+              # SNAP, White #
+              "B22005H_002", # Snap White
+              "B22005H_001", # Snap White Denominator 
+              
+              # Poverty Status, White # 
+              "B17001H_001", # POVERTY STATUS (NH White) # Denominator
+              "B17001H_002", # Income Below poverty level (White)
+              
+              # Total White #
+              "B17001H_001", # Estimate!!Total: POVERTY STATUS IN THE PAST 12 MONTHS BY SEX BY AGE (WHITE ALONE, NOT HISPANIC OR LATINO)
+              
+              # Poverty Status, White Men #
+              "B17001H_004",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+              "B17001H_005",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+              "B17001H_006",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+              "B17001H_007",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+              "B17001H_008",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+              "B17001H_009",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+              "B17001H_010",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+              "B17001H_011",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+              "B17001H_012",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+              "B17001H_013",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+              "B17001H_014",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+              "B17001H_015",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+              "B17001H_016",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+              
+              # At or Above Poverty status White Men (use this to combine with above for Denominator)
+              "B17001H_032",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:
+              "B17001H_033",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+              "B17001H_034",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+              "B17001H_035",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+              "B17001H_036",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+              "B17001H_037",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+              "B17001H_038",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+              "B17001H_039",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+              "B17001H_040",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+              "B17001H_041",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+              "B17001H_042",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+              "B17001H_043",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+              "B17001H_044",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+              "B17001H_045",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+              
+              # Poverty Status, White Women #
+              "B17001H_018",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+              "B17001H_019",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+              "B17001H_020",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+              "B17001H_021",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+              "B17001H_022",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+              "B17001H_023",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+              "B17001H_024",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+              "B17001H_025",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+              "B17001H_026",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+              "B17001H_027",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+              "B17001H_028",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+              "B17001H_029",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+              "B17001H_030",	# Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over
+              
+              # At or Above Poverty status White Women (use this to combine with above for Denominator)
+              "B17001H_047",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+              "B17001H_048",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+              "B17001H_049",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+              "B17001H_050",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+              "B17001H_051",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+              "B17001H_052",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+              "B17001H_053",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+              "B17001H_054",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+              "B17001H_055",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+              "B17001H_056",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+              "B17001H_057",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+              "B17001H_058",	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+              "B17001H_059",  	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over
+              
+              # Educational Attainment, White #
+              
+              # Total White #
+              "C15002H_001",	# Estimate!!Total:	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (White NH)
+              
+              # White Men #
+              "C15002H_003",	# Estimate!!Total:!!Male:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (White NH)
+              "C15002H_006",	# Estimate!!Total:!!Male:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (White NH)
+              
+              # White Women #
+              "C15002H_008",	# Estimate!!Total:!!Female:!!Less than high school diploma	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (White NH)
+              "C15002H_011",  # Estimate!!Total:!!Female:!!Bachelor's degree or higher	SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER (White NH)
+              
+              # Employment Status, White #
+              
+              # Civilian Employment Status 16-64 (In labor force), White Men #
+              "C23002H_006", 	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (White Not HS)
+              
+              # Employed vs Unemployed #
+              "C23002H_008",	# Estimate!!Total:!!Male:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (White Not HS)
+              
+              # Civilian Employment Status 16-64, White Women #
+              "C23002H_019",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (White Not HS)                
+              
+              # Employed vs Unemployed #
+              "C23002H_021",	# Estimate!!Total:!!Female:!!16 to 64 years:!!In labor force:!!Civilian:!!Unemployed	SEX BY AGE BY EMPLOYMENT STATUS FOR THE POPULATION 16 YEARS AND OVER (White Not HS)
+              
+              # Disability Status, White # 
+              
+              # Disability status, ages 18-64 White
+              "B18101H_005",	# Estimate!!Total:!!18 to 64 years:	AGE BY DISABILITY STATUS (WHITE ALONE, NOT HISPANIC OR LATINO)
+              "B18101H_006",	# Estimate!!Total:!!18 to 64 years:!!With a disability	AGE BY DISABILITY STATUS (WHITE ALONE, NOT HISPANIC OR LATINO)
+              
+              # Insurance Status, White #
+              
+              # Health Insurance Coverage White, by Age #
+              "C27001H_001",	# Estimate!!Total:	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_002",	# Estimate!!Total:!!Under 19 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_004",	# Estimate!!Total:!!Under 19 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_005",	# Estimate!!Total:!!19 to 64 years:	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_007",	# Estimate!!Total:!!19 to 64 years:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_008",	# Estimate!!Total:!!65 years and over:	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+              "C27001H_010"	# Estimate!!Total:!!65 years and over:!!No health insurance coverage	HEALTH INSURANCE COVERAGE STATUS BY AGE (White NH)
+)
+```
+
+
+2. Produce a table with the results, showing the share of Hispanic, nh-White, Native
+American, respectively, that fill out the categories. For example, what percentage of
+white households receive SNAP? In a paragraph discuss the main findings.
+
+Generate Table for NM:
+
+
+```{r}
+rm(list=ls())
+
+# Packages #
+library(tigris)
+library(tidycensus)
+library(tidyverse)
+library(dplyr)
+library(haven)
+library(reactable)
+key = "4e29c959c64c919e7df032a5fed2ae4b8b88eee8"
+census_api_key(key)
+
+# Source Code #
+source("C:/Users/dalop/Dropbox/pols512/assignment_4/acs_vars.R")
+
+acs_factor5 <- function(vars, # Make individual vectors for each racial group #
+                        geography = "state",
+                        year = 2020,        
+                        state){
+  
+  acs20_state <- get_acs(geography = geography, 
+                         variables = acs_vars, 
+                         year = year,
+                         state = state,
+                         output = "wide")
+  
+  acs20_state_final <- acs20_state %>%
+    mutate(tot_pop= B01003_001E,
+           
+           # Race/Ethnicity #
+           nh_white= B03002_003E,
+           nh_native= B03002_005E, 
+           hispanic= B03002_012E, 
+           pct_white = nh_white / tot_pop, 
+           pct_native = nh_native /tot_pop, 
+           pct_hispanic = hispanic / tot_pop,
+           
+           # Median HH Income #
+           med_hh_inc= B19013_001E, 
+           med_hh_inc_white = B19013H_001E, 
+           med_hh_inc_native = B19013C_001E, 
+           med_hh_inc_hispanic = B19013I_001E, 
+           
+           # Household Income #
+           inc_total_households = B19001_001E, 
+           inc_total_households_white = B19001H_001E,
+           inc_total_households_native = B19001C_001E, 
+           inc_total_households_hispanic = B19001I_001E, 
+           hh_inc_total_white_100 =B19001H_014E, 
+           hh_inc_total_white_125 =B19001H_015E, 
+           hh_inc_total_white_150 =B19001H_016E, 
+           hh_inc_total_white_200 = B19001H_017E, 
+           hh_inc_total_native_100 = B19001C_014E, 
+           hh_inc_total_native_125 = B19001C_015E, 
+           hh_inc_total_native_150 = B19001C_016E, 
+           hh_inc_total_native_200 = B19001C_017E,
+           hh_inc_total_hispanic_100 = B19001I_014E, 
+           hh_inc_total_hispanic_125 = B19001I_015E, 
+           hh_inc_total_hispanic_150 = B19001I_016E, 
+           hh_inc_total_hispanic_200 = B19001I_017E,
+           pct_hh_inc_white_100p= (hh_inc_total_white_100 + hh_inc_total_white_125 + 
+                                     hh_inc_total_white_150+ 
+                                     hh_inc_total_white_200)/inc_total_households_white, 
+           pct_hh_inc_white_125p= (hh_inc_total_white_125 + hh_inc_total_white_150+
+                                     hh_inc_total_white_200)/inc_total_households_white, 
+           pct_hh_inc_native_100p= (hh_inc_total_native_100 + hh_inc_total_native_125 + 
+                                     hh_inc_total_native_150+ 
+                                     hh_inc_total_native_200)/inc_total_households_native, 
+           pct_hh_inc_native_125p= (hh_inc_total_native_125 + hh_inc_total_native_150+ 
+                                     hh_inc_total_native_200)/inc_total_households_native, 
+           pct_hh_inc_hispanic_100p= (hh_inc_total_hispanic_100 + hh_inc_total_hispanic_125 + 
+                                      hh_inc_total_hispanic_150+ 
+                                      hh_inc_total_hispanic_200)/inc_total_households_hispanic, 
+           pct_hh_inc_hispanic_125p= (hh_inc_total_hispanic_125 + hh_inc_total_hispanic_150+ 
+                                      hh_inc_total_hispanic_200)/inc_total_households_hispanic, 
+           
+           # SNAP #
+           snap_white= B22005H_002E, 
+           snap_native= B22005C_002E,
+           snap_hispanic= B22005I_002E,
+           pct_snap_white= snap_white/B22005H_001E,
+           pct_snap_native= snap_native/B22005C_001E, 
+           pct_snap_hispanic= snap_hispanic/B22005I_001E,
+           
+           # Poverty Status 
+           pct_white_below_poverty = B17001H_002E / B17001H_001E,
+           pct_native_below_poverty = B17001C_002E / B17001C_001E,
+           pct_hispanic_below_poverty = B17001I_002E / B17001I_001E,
+           
+           # Poverty Status White Below 18 #
+           white_below18_total = B17001H_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001H_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001H_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001H_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001H_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001H_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001H_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001H_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001H_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001H_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001H_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001H_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001H_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001H_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001H_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001H_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001H_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001H_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001H_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001H_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001H_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001H_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001H_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001H_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+             
+           white_below18_poverty = B17001H_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001H_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001H_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001H_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001H_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001H_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001H_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001H_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001H_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001H_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001H_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001H_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+           
+           pct_white_below_poverty_child = white_below18_poverty / white_below18_total,
+           
+           # Poverty Status White Adults #
+           white_above18_total = B17001H_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001H_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001H_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001H_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001H_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001H_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001H_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001H_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001H_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001H_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001H_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001H_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001H_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+             B17001H_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001H_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001H_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001H_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001H_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001H_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001H_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001H_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001H_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001H_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001H_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001H_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001H_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001H_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over              
+             
+           white_above18_poverty = B17001H_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001H_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001H_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001H_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001H_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001H_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001H_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001H_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001H_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001H_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001H_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001H_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001H_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001H_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over  
+           
+           pct_white_below_poverty_adult = white_above18_poverty /white_above18_total,
+           
+           # Poverty Status Native Below 18 #
+           native_below18_total = B17001C_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001C_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001C_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001C_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001C_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001C_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001C_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001C_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001C_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001C_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001C_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001C_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001C_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001C_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001C_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001C_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001C_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001C_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001C_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001C_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001C_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001C_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001C_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001C_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+             
+           native_below18_poverty = B17001C_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001C_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001C_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001C_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001C_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001C_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001C_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001C_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001C_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001C_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001C_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001C_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+           
+           pct_native_below_poverty_child = native_below18_poverty / native_below18_total,
+           
+           # Poverty Status Native Adults #
+           native_above18_total = B17001C_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001C_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001C_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001C_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001C_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001C_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001C_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001C_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001C_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001C_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001C_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001C_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001C_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001C_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over 
+             B17001C_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001C_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001C_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001C_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001C_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001C_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001C_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001C_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001C_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001C_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001C_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001C_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001C_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001C_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over            
+          
+           native_above18_poverty = B17001C_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001C_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001C_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001C_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001C_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001C_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001C_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001C_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001C_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001C_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001C_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001C_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001C_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001C_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+           
+           pct_native_below_poverty_adult = native_above18_poverty / native_above18_total,
+           
+           # Poverty Status Hispanic Below 18 #
+           hispanic_below18_total = B17001I_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001I_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001I_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001I_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001I_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001I_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001I_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001I_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001I_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001I_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001I_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001I_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001I_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001I_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001I_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001I_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001I_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001I_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001I_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001I_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001I_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001I_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001I_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001I_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+             
+           hispanic_below18_poverty = B17001I_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001I_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001I_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001I_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001I_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001I_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001I_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001I_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001I_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001I_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001I_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001I_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+          
+           pct_hispanic_below_poverty_child = hispanic_below18_poverty / hispanic_below18_total,
+           
+           # Poverty Status Hispanic Adults #
+           hispanic_above18_total = B17001I_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001I_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001I_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001I_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001I_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001I_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001I_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001I_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001I_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001I_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001I_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001I_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001I_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001I_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+             B17001I_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001I_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001I_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001I_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001I_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001I_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001I_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001I_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001I_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001I_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001I_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001I_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001I_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001I_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over              
+             
+           hispanic_above18_poverty = B17001I_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001I_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001I_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001I_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001I_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001I_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001I_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001I_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001I_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001I_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001I_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001I_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001I_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001I_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over  
+           
+           pct_hispanic_below_poverty_adult = hispanic_above18_poverty / hispanic_above18_total,
+           
+           #Educational Attainment, White #
+           pct_educ_less_hs_white = (C15002H_003E + C15002H_008E)/C15002H_001E,
+           pct_educ_bachelor_white= (C15002H_006E+ C15002H_011E)/C15002H_001E,
+          
+           #Educational Attainment, Native #
+           pct_educ_less_hs_native = (C15002C_003E + C15002C_008E)/C15002C_001E,
+           pct_educ_bachelor_native= (C15002C_006E+ C15002C_011E)/C15002C_001E, 
+           
+           #Educational Attainment, Hispanic #
+           pct_educ_less_hs_hispanic = (C15002I_003E + C15002I_008E)/C15002I_001E,
+           pct_educ_bachelor_hispanic= (C15002I_006E+ C15002I_011E)/C15002I_001E,
+           
+           #Civilian Employment in Labor Force, 16-64 White
+           civilian_empl_status_total_white= C23002H_006E+ C23002H_019E,
+           pct_umemployed_white = (C23002H_008E+C23002H_021E)/civilian_empl_status_total_white,
+           
+           #Civilian Employment in Labor Force, 16-64 Native
+           civilian_empl_status_total_native= C23002C_006E+ C23002C_019E,
+           pct_umemployed_native = (C23002C_008E+C23002C_021E)/civilian_empl_status_total_native,
+           
+           #Civilian Employment in Labor Force, 16-64 Hispanic
+           civilian_empl_status_total_hispanic= C23002I_006E+ C23002I_019E,
+           pct_umemployed_hispanic = (C23002I_008E+C23002I_021E)/civilian_empl_status_total_hispanic,
+           
+           #Disabled, Ages 18-64 White, Native, Hispanic
+           pct_disabled_white= B18101H_006E/B18101H_005E, 
+           pct_disabled_native= B18101C_006E/B18101C_005E,
+           pct_disabled_hispanic= B18101I_006E/B18101I_005E,
+           
+           #Uninsured White, Native, Hispanic (19-64)
+           pct_uninsured_white_19_64 = C27001H_007E/C27001H_005E,
+           pct_uninsured_native_19_64 = C27001C_007E/C27001C_005E, 
+           pct_uninsured_hispanic_19_64 = C27001I_007E/C27001I_005E
+    ) %>% select(pct_white, pct_native, pct_hispanic,
+                 med_hh_inc_white, med_hh_inc_native, med_hh_inc_hispanic,
+                 pct_hh_inc_white_100p, pct_hh_inc_white_125p,
+                 pct_hh_inc_native_100p, pct_hh_inc_native_125p,
+                 pct_hh_inc_hispanic_100p, pct_hh_inc_hispanic_125p, 
+                 pct_snap_white, pct_snap_native, pct_snap_hispanic,
+                 pct_white_below_poverty, pct_native_below_poverty, pct_hispanic_below_poverty,
+                 pct_white_below_poverty_child, pct_white_below_poverty_adult, 
+                 pct_native_below_poverty_child, pct_native_below_poverty_adult,
+                 pct_hispanic_below_poverty_child, pct_hispanic_below_poverty_adult, 
+                 pct_educ_less_hs_white, pct_educ_bachelor_white, 
+                 pct_educ_less_hs_native, pct_educ_bachelor_native,
+                 pct_educ_less_hs_hispanic, pct_educ_bachelor_hispanic, 
+                 pct_umemployed_white, pct_umemployed_native, pct_umemployed_hispanic,
+                 pct_disabled_white, pct_disabled_native, pct_disabled_hispanic,
+                 pct_uninsured_white_19_64, pct_uninsured_native_19_64, pct_uninsured_hispanic_19_64)
+  
+  # Write out #
+  write_rds(acs20_state_final, 
+            file ="nm_acs20_state_final.rds")      
+  
+  # Turn the above into a function with a write out option -- then apply the function to the county  data
+  # County #
+  acs20_county <- get_acs(geography = "county", 
+                          variables = acs_vars, 
+                          year = 2020,
+                          state = "NM", output="wide")
+  
+  # White Vector #
+  white <- acs20_state_final %>%
+    select(med_hh_inc_white,
+           pct_hh_inc_white_100p,
+           pct_hh_inc_white_125p,
+           pct_snap_white,
+           pct_white_below_poverty,
+           pct_white_below_poverty_child,
+           pct_white_below_poverty_adult,
+           pct_educ_less_hs_white, 
+           pct_educ_bachelor_white,
+           pct_umemployed_white,
+           pct_disabled_white,
+           pct_uninsured_white_19_64)
+  
+  # Native Vector #
+  native <- acs20_state_final %>%
+    select(med_hh_inc_native, 
+           pct_hh_inc_native_100p,
+           pct_hh_inc_native_125p,
+           pct_snap_native,
+           pct_native_below_poverty,
+           pct_native_below_poverty_child,
+           pct_native_below_poverty_adult,
+           pct_educ_less_hs_native,
+           pct_educ_bachelor_native,
+           pct_umemployed_native,
+           pct_disabled_native,
+           pct_uninsured_native_19_64) 
+  
+  # Hispanic Vector #
+  hispanic <- acs20_state_final %>%
+    select(med_hh_inc_hispanic,
+           pct_hh_inc_hispanic_100p,
+           pct_hh_inc_hispanic_125p,
+           pct_snap_hispanic,
+           pct_hispanic_below_poverty,
+           pct_hispanic_below_poverty_child,
+           pct_hispanic_below_poverty_adult,
+           pct_educ_less_hs_hispanic, 
+           pct_educ_bachelor_hispanic,
+           pct_umemployed_hispanic,
+           pct_disabled_hispanic,
+           pct_uninsured_hispanic_19_64)
+  
+  # Combine Data #
+  ses <- data.frame(White = round(t(white), 3),
+                    Native = round(t(native),3),
+                    Hispanic = round(t(hispanic),3)) %>%
+    dplyr::mutate(White_NativeDiff = White - Native) %>%
+    dplyr::mutate(White_HispanicDiff = White - Hispanic) %>%
+    dplyr::mutate(Hispanic_NativeDiff = Hispanic - Native)
+  
+  # Recode Adjustments #
+  ses$White[1] <- paste0("$",ses$White[1])
+  ses$Native[1] <- paste0("$",ses$Native[1])
+  ses$Hispanic[1] <- paste0("$",ses$Hispanic[1])
+  ses$White_NativeDiff[1] <- paste0("$",ses$White_NativeDiff[1])
+  ses$White_HispanicDiff[1] <- paste0("$",ses$White_HispanicDiff[1])
+  ses$Hispanic_NativeDiff[1] <- paste0("$",ses$Hispanic_NativeDiff[1])
+  
+  # Table Labeling #
+  colnames(ses) <- c("White", "Native", "Hispanic", "White - Native", "White - Hispanic", "Hispanic - Native")
+  
+  rownames(ses) <- c("Median Household Income",
+                     "Pct. HH Income > $100K",
+                     "Pct. HH Income > $125K",
+                     "Pct. HH receiving SNAP",
+                     "Pct. HH below poverty line",
+                     "Pct. HH below poverty line, children",
+                     "Pct. HH below poverty line, VAP",
+                     "Pct. w/ Less than HS Diploma",
+                     "Pct. w/ Bachelor's Degree or higher",
+                     "Pct. Unemployed",
+                     "Pct Disabled, ages 19-64",
+                     "Pct. Uninsured, ages 19-64"
+  )
+  
+  # Produce Table -- as an exmaple #
+  reactable(ses,
+            pagination = F,
+            width = 700)
+  
+}
+
+# Execute #
+acs_factor5(vars = acs_vars,
+            state = "NM")
+```
+
+Main Findings:
+
+In the state of New Mexico, Non-Hispanic White residents are the highest median household income earners of the three racial/ethnic groups analyzed, with a median household income of $60,767. White residents of the state make $24,472 more than their Native American counterparts and $16,119 more than their Hispanic/Latino counterparts respectively. Both minority groups (Native Americans and Hispanics/Latinos), heavily depend on public assistance, with 29.8% of Native American household and 22.4% of Hispanic households relying on SNAP assistance compared to only 10% of Non-Hispanic White households. Native Americans also tend to experience high levels of poverty, particularly those aged 0-17 years old, with 40.3% of Native American youth living below the poverty line; despite poverty decreasing in age groups above the aforementioned range, adult poverty for this particular racial group remains above the 25% threshold. Non-Hispanic Whites are the most highly educated racial group in the state, with 41% of Non-Hispanic Whites having a Bachelor's Degree or higher, in sharp contrast, Hispanics/Latinos are the largest group with an education level lower than a high school diploma, 21%. However, unemployment for these groups are relatively similar, with 5% of Non-Hispanic Whites and 6% of Hispanic/Latinos being unemployed. Similarly, both these groups share identical rates of disability with 13.6% of Non-Hispanic Whites and Hispanics/Latinos being disabled. Native Americans are the least insured demographic with 26.8% of the population being uninsured, a 19% difference when compared to their Non-Hispanic White counterparts. 
+
+
+3. Write a function that calls the ACS data, specifies race group (focusing on either NH-
+White, NH-Black, Native American, AAPI, Hispanic) as the main possible groups, then
+spits out a table comparison. Also include arguments for the types of variables to
+include (ie., HH Income, Snap). The function should take all variables I produced in class
+as the default but allow the user to specify a subset of variables. Test out the function
+with New Mexico data, then use it to collect California data. Produce a table just for CA,
+including the above race populations (since there are probably just enough in all groups
+for useful comparisons). Consider sizing options for the table so that it is readable.
+
+```{r}
+
+
+rm(list=ls())
+
+# Packages #
+library(tigris)
+library(tidycensus)
+library(tidyverse)
+library(dplyr)
+library(haven)
+library(reactable)
+key = "4e29c959c64c919e7df032a5fed2ae4b8b88eee8"
+census_api_key(key)
+
+# Source Code #
+source("C:/Users/dalop/Dropbox/pols512/assignment_4/acs_vars.R")
+
+#acs_factor5(vars = c("B19013_001", "B01003_001", "B03002_012")) Change variables as needed
+
+acs_factor5 <- function(vars, # Make individual vectors for each racial group #
+                        geography = "state",
+                        year = 2020,        
+                        state){
+  
+  acs20_state <- get_acs(geography = geography, 
+                         variables = acs_vars, 
+                         year = year,
+                         state = state,
+                         output = "wide")
+  
+  acs20_state_final <- acs20_state %>%
+    mutate(tot_pop= B01003_001E,
+           
+           # Race/Ethnicity #
+           nh_white= B03002_003E,
+           nh_native= B03002_005E, 
+           hispanic= B03002_012E, 
+           pct_white = nh_white / tot_pop, 
+           pct_native = nh_native /tot_pop, 
+           pct_hispanic = hispanic / tot_pop,
+           
+           # Median HH Income #
+           med_hh_inc= B19013_001E, 
+           med_hh_inc_white = B19013H_001E, 
+           med_hh_inc_native = B19013C_001E, 
+           med_hh_inc_hispanic = B19013I_001E, 
+           
+           # Household Income #
+           inc_total_households = B19001_001E, 
+           inc_total_households_white = B19001H_001E,
+           inc_total_households_native = B19001C_001E, 
+           inc_total_households_hispanic = B19001I_001E, 
+           hh_inc_total_white_100 =B19001H_014E, 
+           hh_inc_total_white_125 =B19001H_015E, 
+           hh_inc_total_white_150 =B19001H_016E, 
+           hh_inc_total_white_200 = B19001H_017E, 
+           hh_inc_total_native_100 = B19001C_014E, 
+           hh_inc_total_native_125 = B19001C_015E, 
+           hh_inc_total_native_150 = B19001C_016E, 
+           hh_inc_total_native_200 = B19001C_017E,
+           hh_inc_total_hispanic_100 = B19001I_014E, 
+           hh_inc_total_hispanic_125 = B19001I_015E, 
+           hh_inc_total_hispanic_150 = B19001I_016E, 
+           hh_inc_total_hispanic_200 = B19001I_017E,
+           pct_hh_inc_white_100p= (hh_inc_total_white_100 + hh_inc_total_white_125 + 
+                                     hh_inc_total_white_150+ 
+                                     hh_inc_total_white_200)/inc_total_households_white, 
+           pct_hh_inc_white_125p= (hh_inc_total_white_125 + hh_inc_total_white_150+
+                                     hh_inc_total_white_200)/inc_total_households_white, 
+           pct_hh_inc_native_100p= (hh_inc_total_native_100 + hh_inc_total_native_125 + 
+                                      hh_inc_total_native_150+ 
+                                      hh_inc_total_native_200)/inc_total_households_native, 
+           pct_hh_inc_native_125p= (hh_inc_total_native_125 + hh_inc_total_native_150+ 
+                                      hh_inc_total_native_200)/inc_total_households_native, 
+           pct_hh_inc_hispanic_100p= (hh_inc_total_hispanic_100 + hh_inc_total_hispanic_125 + 
+                                        hh_inc_total_hispanic_150+ 
+                                        hh_inc_total_hispanic_200)/inc_total_households_hispanic, 
+           pct_hh_inc_hispanic_125p= (hh_inc_total_hispanic_125 + hh_inc_total_hispanic_150+ 
+                                        hh_inc_total_hispanic_200)/inc_total_households_hispanic, 
+           
+           # SNAP #
+           snap_white= B22005H_002E, 
+           snap_native= B22005C_002E,
+           snap_hispanic= B22005I_002E,
+           pct_snap_white= snap_white/B22005H_001E,
+           pct_snap_native= snap_native/B22005C_001E, 
+           pct_snap_hispanic= snap_hispanic/B22005I_001E,
+           
+           # Poverty Status 
+           pct_white_below_poverty = B17001H_002E / B17001H_001E,
+           pct_native_below_poverty = B17001C_002E / B17001C_001E,
+           pct_hispanic_below_poverty = B17001I_002E / B17001I_001E,
+           
+           # Poverty Status White Below 18 #
+           white_below18_total = B17001H_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001H_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001H_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001H_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001H_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001H_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001H_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001H_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001H_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001H_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001H_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001H_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001H_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001H_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001H_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001H_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001H_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001H_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001H_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001H_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001H_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001H_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001H_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001H_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+           
+           white_below18_poverty = B17001H_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001H_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001H_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001H_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001H_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001H_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001H_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001H_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001H_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001H_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001H_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001H_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+           
+           pct_white_below_poverty_child = white_below18_poverty / white_below18_total,
+           
+           # Poverty Status White Adults #
+           white_above18_total = B17001H_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001H_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001H_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001H_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001H_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001H_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001H_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001H_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001H_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001H_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001H_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001H_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001H_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+             B17001H_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001H_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001H_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001H_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001H_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001H_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001H_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001H_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001H_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001H_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001H_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001H_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001H_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001H_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over              
+           
+           white_above18_poverty = B17001H_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001H_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001H_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001H_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001H_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001H_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001H_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001H_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001H_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001H_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001H_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001H_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001H_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001H_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over  
+           
+           pct_white_below_poverty_adult = white_above18_poverty /white_above18_total,
+           
+           # Poverty Status Native Below 18 #
+           native_below18_total = B17001C_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001C_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001C_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001C_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001C_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001C_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001C_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001C_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001C_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001C_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001C_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001C_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001C_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001C_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001C_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001C_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001C_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001C_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001C_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001C_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001C_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001C_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001C_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001C_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+           
+           native_below18_poverty = B17001C_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001C_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001C_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001C_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001C_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001C_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001C_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001C_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001C_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001C_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001C_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001C_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+           
+           pct_native_below_poverty_child = native_below18_poverty / native_below18_total,
+           
+           # Poverty Status Native Adults #
+           native_above18_total = B17001C_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001C_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001C_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001C_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001C_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001C_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001C_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001C_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001C_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001C_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001C_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001C_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001C_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001C_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over 
+             B17001C_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001C_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001C_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001C_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001C_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001C_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001C_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001C_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001C_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001C_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001C_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001C_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001C_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001C_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over            
+           
+           native_above18_poverty = B17001C_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001C_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001C_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001C_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001C_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001C_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001C_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001C_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001C_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001C_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001C_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001C_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001C_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001C_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+           
+           pct_native_below_poverty_adult = native_above18_poverty / native_above18_total,
+           
+           # Poverty Status Hispanic Below 18 #
+           hispanic_below18_total = B17001I_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001I_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001I_006E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001I_007E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001I_008E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001I_009E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001I_018E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001I_019E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001I_020E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001I_021E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001I_022E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001I_023E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+             B17001I_033E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!Under 5 years
+             B17001I_034E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!5 years
+             B17001I_035E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!6 to 11 years
+             B17001I_036E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!12 to 14 years
+             B17001I_037E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!15 years
+             B17001I_038E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!16 and 17 years
+             B17001I_047E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!Under 5 years
+             B17001I_048E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!5 years
+             B17001I_049E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!6 to 11 years
+             B17001I_050E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!12 to 14 years
+             B17001I_051E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!15 years
+             B17001I_052E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!16 and 17 years
+           
+           hispanic_below18_poverty = B17001I_004E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!Under 5 years
+             B17001I_005E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!5 years
+             B17001I_006E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!6 to 11 years
+             B17001I_007E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!12 to 14 years
+             B17001I_008E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!15 years
+             B17001I_009E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!16 and 17 years
+             B17001I_018E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!Under 5 years
+             B17001I_019E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!5 years
+             B17001I_020E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!6 to 11 years
+             B17001I_021E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!12 to 14 years
+             B17001I_022E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!15 years
+             B17001I_023E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!16 and 17 years
+           
+           pct_hispanic_below_poverty_child = hispanic_below18_poverty / hispanic_below18_total,
+           
+           # Poverty Status Hispanic Adults #
+           hispanic_above18_total = B17001I_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001I_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001I_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001I_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001I_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001I_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001I_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001I_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001I_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001I_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001I_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001I_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001I_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001I_030E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over              
+             B17001I_039E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!18 to 24 years
+             B17001I_040E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!25 to 34 years
+             B17001I_041E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!35 to 44 years
+             B17001I_042E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!45 to 54 years
+             B17001I_043E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!55 to 64 years
+             B17001I_044E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!65 to 74 years
+             B17001I_045E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Male:!!75 years and over
+             B17001I_053E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!18 to 24 years
+             B17001I_054E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!25 to 34 years
+             B17001I_055E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!35 to 44 years
+             B17001I_056E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!45 to 54 years
+             B17001I_057E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!55 to 64 years
+             B17001I_058E+	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!65 to 74 years
+             B17001I_059E,	#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Female:!!75 years and over              
+           
+           hispanic_above18_poverty = B17001I_010E +	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!18 to 24 years
+             B17001I_011E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!25 to 34 years
+             B17001I_012E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!35 to 44 years
+             B17001I_013E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!45 to 54 years
+             B17001I_014E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!55 to 64 years
+             B17001I_015E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!65 to 74 years
+             B17001I_016E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Male:!!75 years and over
+             B17001I_024E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!18 to 24 years
+             B17001I_025E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!25 to 34 years
+             B17001I_026E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!35 to 44 years
+             B17001I_027E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!45 to 54 years
+             B17001I_028E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!55 to 64 years
+             B17001I_029E+	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!65 to 74 years
+             B17001I_030E,	#Estimate!!Total:!!Income in the past 12 months below poverty level:!!Female:!!75 years and over  
+           
+           pct_hispanic_below_poverty_adult = hispanic_above18_poverty / hispanic_above18_total,
+           
+           #Educational Attainment, White #
+           pct_educ_less_hs_white = (C15002H_003E + C15002H_008E)/C15002H_001E,
+           pct_educ_bachelor_white= (C15002H_006E+ C15002H_011E)/C15002H_001E,
+           
+           #Educational Attainment, Native #
+           pct_educ_less_hs_native = (C15002C_003E + C15002C_008E)/C15002C_001E,
+           pct_educ_bachelor_native= (C15002C_006E+ C15002C_011E)/C15002C_001E, 
+           
+           #Educational Attainment, Hispanic #
+           pct_educ_less_hs_hispanic = (C15002I_003E + C15002I_008E)/C15002I_001E,
+           pct_educ_bachelor_hispanic= (C15002I_006E+ C15002I_011E)/C15002I_001E,
+           
+           #Civilian Employment in Labor Force, 16-64 White
+           civilian_empl_status_total_white= C23002H_006E+ C23002H_019E,
+           pct_umemployed_white = (C23002H_008E+C23002H_021E)/civilian_empl_status_total_white,
+           
+           #Civilian Employment in Labor Force, 16-64 Native
+           civilian_empl_status_total_native= C23002C_006E+ C23002C_019E,
+           pct_umemployed_native = (C23002C_008E+C23002C_021E)/civilian_empl_status_total_native,
+           
+           #Civilian Employment in Labor Force, 16-64 Hispanic
+           civilian_empl_status_total_hispanic= C23002I_006E+ C23002I_019E,
+           pct_umemployed_hispanic = (C23002I_008E+C23002I_021E)/civilian_empl_status_total_hispanic,
+           
+           #Disabled, Ages 18-64 White, Native, Hispanic
+           pct_disabled_white= B18101H_006E/B18101H_005E, 
+           pct_disabled_native= B18101C_006E/B18101C_005E,
+           pct_disabled_hispanic= B18101I_006E/B18101I_005E,
+           
+           #Uninsured White, Native, Hispanic (19-64)
+           pct_uninsured_white_19_64 = C27001H_007E/C27001H_005E,
+           pct_uninsured_native_19_64 = C27001C_007E/C27001C_005E, 
+           pct_uninsured_hispanic_19_64 = C27001I_007E/C27001I_005E
+    ) %>% select(pct_white, pct_native, pct_hispanic,
+                 med_hh_inc_white, med_hh_inc_native, med_hh_inc_hispanic,
+                 pct_hh_inc_white_100p, pct_hh_inc_white_125p,
+                 pct_hh_inc_native_100p, pct_hh_inc_native_125p,
+                 pct_hh_inc_hispanic_100p, pct_hh_inc_hispanic_125p, 
+                 pct_snap_white, pct_snap_native, pct_snap_hispanic,
+                 pct_white_below_poverty, pct_native_below_poverty, pct_hispanic_below_poverty,
+                 pct_white_below_poverty_child, pct_white_below_poverty_adult, 
+                 pct_native_below_poverty_child, pct_native_below_poverty_adult,
+                 pct_hispanic_below_poverty_child, pct_hispanic_below_poverty_adult, 
+                 pct_educ_less_hs_white, pct_educ_bachelor_white, 
+                 pct_educ_less_hs_native, pct_educ_bachelor_native,
+                 pct_educ_less_hs_hispanic, pct_educ_bachelor_hispanic, 
+                 pct_umemployed_white, pct_umemployed_native, pct_umemployed_hispanic,
+                 pct_disabled_white, pct_disabled_native, pct_disabled_hispanic,
+                 pct_uninsured_white_19_64, pct_uninsured_native_19_64, pct_uninsured_hispanic_19_64)
+  
+  # Write out #
+  write_rds(acs20_state_final, 
+            file ="nm_acs20_state_final.rds")      
+  
+  # Turn the above into a function with a write out option -- then apply the function to the county  data
+  # County #
+  acs20_county <- get_acs(geography = "county", 
+                          variables = acs_vars, 
+                          year = 2020,
+                          state = "CA", output="wide")
+  
+  # White Vector #
+  white <- acs20_state_final %>%
+    select(med_hh_inc_white,
+           pct_hh_inc_white_100p,
+           pct_hh_inc_white_125p,
+           pct_snap_white,
+           pct_white_below_poverty,
+           pct_white_below_poverty_child,
+           pct_white_below_poverty_adult,
+           pct_educ_less_hs_white, 
+           pct_educ_bachelor_white,
+           pct_umemployed_white,
+           pct_disabled_white,
+           pct_uninsured_white_19_64)
+  
+  # Native Vector #
+  native <- acs20_state_final %>%
+    select(med_hh_inc_native, 
+           pct_hh_inc_native_100p,
+           pct_hh_inc_native_125p,
+           pct_snap_native,
+           pct_native_below_poverty,
+           pct_native_below_poverty_child,
+           pct_native_below_poverty_adult,
+           pct_educ_less_hs_native,
+           pct_educ_bachelor_native,
+           pct_umemployed_native,
+           pct_disabled_native,
+           pct_uninsured_native_19_64) 
+  
+  # Hispanic Vector #
+  hispanic <- acs20_state_final %>%
+    select(med_hh_inc_hispanic,
+           pct_hh_inc_hispanic_100p,
+           pct_hh_inc_hispanic_125p,
+           pct_snap_hispanic,
+           pct_hispanic_below_poverty,
+           pct_hispanic_below_poverty_child,
+           pct_hispanic_below_poverty_adult,
+           pct_educ_less_hs_hispanic, 
+           pct_educ_bachelor_hispanic,
+           pct_umemployed_hispanic,
+           pct_disabled_hispanic,
+           pct_uninsured_hispanic_19_64)
+  
+  # Combine Data #
+  ses <- data.frame(White = round(t(white), 3),
+                    Native = round(t(native),3),
+                    Hispanic = round(t(hispanic),3)) %>%
+    dplyr::mutate(White_NativeDiff = White - Native) %>%
+    dplyr::mutate(White_HispanicDiff = White - Hispanic) %>%
+    dplyr::mutate(Hispanic_NativeDiff = Hispanic - Native)
+  
+  # Recode Adjustments #
+  ses$White[1] <- paste0("$",ses$White[1])
+  ses$Native[1] <- paste0("$",ses$Native[1])
+  ses$Hispanic[1] <- paste0("$",ses$Hispanic[1])
+  ses$White_NativeDiff[1] <- paste0("$",ses$White_NativeDiff[1])
+  ses$White_HispanicDiff[1] <- paste0("$",ses$White_HispanicDiff[1])
+  ses$Hispanic_NativeDiff[1] <- paste0("$",ses$Hispanic_NativeDiff[1])
+  
+  # Table Labeling #
+  colnames(ses) <- c("White", "Native", "Hispanic", "White - Native", "White - Hispanic", "Hispanic - Native")
+  
+  rownames(ses) <- c("Median Household Income",
+                     "Pct. HH Income > $100K",
+                     "Pct. HH Income > $125K",
+                     "Pct. HH receiving SNAP",
+                     "Pct. HH below poverty line",
+                     "Pct. HH below poverty line, children",
+                     "Pct. HH below poverty line, VAP",
+                     "Pct. w/ Less than HS Diploma",
+                     "Pct. w/ Bachelor's Degree or higher",
+                     "Pct. Unemployed",
+                     "Pct Disabled, ages 19-64",
+                     "Pct. Uninsured, ages 19-64"
+  )
+  
+  # Produce Table -- as an exmaple #
+  reactable(ses,
+            pagination = F,
+            width = 700)
+  
+}
+
+# Execute #
+acs_factor5(vars = acs_vars,
+            state = "CA")
+
+```

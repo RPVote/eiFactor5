@@ -54,15 +54,19 @@
 #' @examples
 #' \dontrun{
 #' # All NM counties, White vs Black vs Hispanic
-#' dat <- f5_fetch(state = "NM", geography = "county", year = 2022,
-#'                 groups = c("white", "black", "hispanic"))
+#' dat <- f5_fetch(
+#'   state = "NM", geography = "county", year = 2022,
+#'   groups = c("white", "black", "hispanic")
+#' )
 #'
 #' # National, state-level, all 5 groups
 #' dat <- f5_fetch(geography = "state", year = 2022)
 #'
 #' # Specific counties, tract-level with geometry
-#' dat <- f5_fetch(state = "NM", county = c("049", "039"),
-#'                 geography = "tract", geometry = TRUE)
+#' dat <- f5_fetch(
+#'   state = "NM", county = c("049", "039"),
+#'   geography = "tract", geometry = TRUE
+#' )
 #' }
 #'
 #' @export
@@ -74,13 +78,14 @@ f5_fetch <- function(state = NULL,
                      groups = c("white", "black", "hispanic", "aapi", "native"),
                      survey = "acs5",
                      geometry = FALSE) {
-
   # Validate inputs
   valid_groups <- c("white", "black", "hispanic", "aapi", "native")
   groups <- match.arg(groups, valid_groups, several.ok = TRUE)
 
-  valid_geo <- c("state", "county", "tract", "block group",
-                 "congressional district")
+  valid_geo <- c(
+    "state", "county", "tract", "block group",
+    "congressional district"
+  )
   geography <- match.arg(geography, valid_geo)
 
   survey <- match.arg(survey, c("acs5", "acs1"))

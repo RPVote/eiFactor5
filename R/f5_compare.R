@@ -31,7 +31,6 @@ f5_compare <- function(data,
                        ref_group = "white",
                        compare_group,
                        indicators = NULL) {
-
   groups <- attr(data, "groups")
   if (is.null(groups)) {
     stop("'data' must be output from f5_fetch() with group metadata.")

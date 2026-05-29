@@ -4,7 +4,6 @@
 #' @return data.frame with 12 indicator columns named {indicator}_{group}
 #' @keywords internal
 compute_group <- function(data, group) {
-
   suffix_map <- list(
     white = "H", black = "B", hispanic = "I",
     aapi = c("D", "E"), native = "C"

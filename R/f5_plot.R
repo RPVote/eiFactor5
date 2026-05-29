@@ -17,9 +17,11 @@
 #' \dontrun{
 #' dat <- f5_fetch(state = "MS", geography = "county")
 #' f5_plot(dat, ref_group = "white", compare_groups = "black")
-#' f5_plot(dat, ref_group = "white",
-#'         compare_groups = c("black", "hispanic"),
-#'         type = "dot")
+#' f5_plot(dat,
+#'   ref_group = "white",
+#'   compare_groups = c("black", "hispanic"),
+#'   type = "dot"
+#' )
 #' }
 #'
 #' @export
@@ -31,7 +33,6 @@ f5_plot <- function(data,
                     compare_groups = NULL,
                     type = "bar",
                     indicators = NULL) {
-
   groups <- attr(data, "groups")
   if (is.null(compare_groups)) {
     compare_groups <- setdiff(groups, ref_group)
@@ -54,7 +55,9 @@ f5_plot <- function(data,
       col_name <- paste0(ind_id, "_", grp)
       vals <- data[[col_name]]
       vals <- vals[!is.na(vals)]
-      if (length(vals) == 0) return(NULL)
+      if (length(vals) == 0) {
+        return(NULL)
+      }
 
       if (meta$summary_type[i] == "median") {
         val <- stats::median(vals)
@@ -78,8 +81,10 @@ f5_plot <- function(data,
   # Order indicators as in metadata
   plot_data$indicator <- factor(plot_data$indicator, levels = rev(meta$label))
   # Order groups: ref first
-  grp_levels <- c(group_display_name(ref_group),
-                  sapply(compare_groups, group_display_name))
+  grp_levels <- c(
+    group_display_name(ref_group),
+    sapply(compare_groups, group_display_name)
+  )
   plot_data$group <- factor(plot_data$group, levels = grp_levels)
 
   year <- attr(data, "year")
@@ -87,11 +92,15 @@ f5_plot <- function(data,
   subtitle <- paste0("ACS ", year, ", ", geo, "-level data")
 
   if (type == "dot") {
-    p <- ggplot2::ggplot(plot_data,
-                         ggplot2::aes(x = .data$value,
-                                      y = .data$indicator,
-                                      color = .data$group,
-                                      shape = .data$group)) +
+    p <- ggplot2::ggplot(
+      plot_data,
+      ggplot2::aes(
+        x = .data$value,
+        y = .data$indicator,
+        color = .data$group,
+        shape = .data$group
+      )
+    ) +
       ggplot2::geom_point(size = 3) +
       ggplot2::scale_x_continuous(labels = scales_pct_label) +
       ggplot2::labs(
@@ -108,10 +117,14 @@ f5_plot <- function(data,
         axis.text.y = ggplot2::element_text(size = 10)
       )
   } else {
-    p <- ggplot2::ggplot(plot_data,
-                         ggplot2::aes(x = .data$indicator,
-                                      y = .data$value,
-                                      fill = .data$group)) +
+    p <- ggplot2::ggplot(
+      plot_data,
+      ggplot2::aes(
+        x = .data$indicator,
+        y = .data$value,
+        fill = .data$group
+      )
+    ) +
       ggplot2::geom_bar(stat = "identity", position = "dodge") +
       ggplot2::scale_y_continuous(labels = scales_pct_label) +
       ggplot2::coord_flip() +

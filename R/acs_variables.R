@@ -11,25 +11,24 @@
 #' @return Character vector of ACS variable codes
 #' @keywords internal
 get_acs_vars <- function(groups = c("white", "black", "hispanic", "aapi", "native")) {
-
   # Mapping from group names to ACS suffixes
   suffix_map <- list(
     white = "H",
     black = "B",
     hispanic = "I",
-    aapi = c("D", "E"),   # Asian + Pacific Islander
+    aapi = c("D", "E"), # Asian + Pacific Islander
     native = "C"
   )
 
   # Base variables (always needed)
   vars <- c(
-    "B01003_001",   # Total population
-    "B03002_003",   # White NH
-    "B03002_004",   # Black NH
-    "B03002_005",   # Native NH
-    "B03002_006",   # Asian NH
-    "B03002_007",   # Pacific Islander NH
-    "B03002_012"    # Hispanic
+    "B01003_001", # Total population
+    "B03002_003", # White NH
+    "B03002_004", # Black NH
+    "B03002_005", # Native NH
+    "B03002_006", # Asian NH
+    "B03002_007", # Pacific Islander NH
+    "B03002_012" # Hispanic
   )
 
   for (grp in groups) {
@@ -37,32 +36,33 @@ get_acs_vars <- function(groups = c("white", "black", "hispanic", "aapi", "nativ
     if (is.null(suffixes)) next
 
     for (sfx in suffixes) {
-      vars <- c(vars,
+      vars <- c(
+        vars,
         # Median HH Income
         paste0("B19013", sfx, "_001"),
 
         # HH Income distribution (for >100K, >125K)
-        paste0("B19001", sfx, "_001"),  # total households
-        paste0("B19001", sfx, "_014"),  # $100K-$124K
-        paste0("B19001", sfx, "_015"),  # $125K-$149K
-        paste0("B19001", sfx, "_016"),  # $150K-$199K
-        paste0("B19001", sfx, "_017"),  # $200K+
+        paste0("B19001", sfx, "_001"), # total households
+        paste0("B19001", sfx, "_014"), # $100K-$124K
+        paste0("B19001", sfx, "_015"), # $125K-$149K
+        paste0("B19001", sfx, "_016"), # $150K-$199K
+        paste0("B19001", sfx, "_017"), # $200K+
 
         # SNAP
-        paste0("B22005", sfx, "_001"),  # denominator
-        paste0("B22005", sfx, "_002"),  # receiving SNAP
+        paste0("B22005", sfx, "_001"), # denominator
+        paste0("B22005", sfx, "_002"), # receiving SNAP
 
         # Poverty status
-        paste0("B17001", sfx, "_001"),  # denominator
-        paste0("B17001", sfx, "_002"),  # below poverty
+        paste0("B17001", sfx, "_001"), # denominator
+        paste0("B17001", sfx, "_002"), # below poverty
 
         # Poverty: children (under 18) - males
-        paste0("B17001", sfx, "_004"),  # below pov male <5
-        paste0("B17001", sfx, "_005"),  # below pov male 5
-        paste0("B17001", sfx, "_006"),  # below pov male 6-11
-        paste0("B17001", sfx, "_007"),  # below pov male 12-14
-        paste0("B17001", sfx, "_008"),  # below pov male 15
-        paste0("B17001", sfx, "_009"),  # below pov male 16-17
+        paste0("B17001", sfx, "_004"), # below pov male <5
+        paste0("B17001", sfx, "_005"), # below pov male 5
+        paste0("B17001", sfx, "_006"), # below pov male 6-11
+        paste0("B17001", sfx, "_007"), # below pov male 12-14
+        paste0("B17001", sfx, "_008"), # below pov male 15
+        paste0("B17001", sfx, "_009"), # below pov male 16-17
         # above pov male children
         paste0("B17001", sfx, "_033"),
         paste0("B17001", sfx, "_034"),
@@ -72,7 +72,7 @@ get_acs_vars <- function(groups = c("white", "black", "hispanic", "aapi", "nativ
         paste0("B17001", sfx, "_038"),
 
         # Poverty: children - females
-        paste0("B17001", sfx, "_018"),  # below pov female <5
+        paste0("B17001", sfx, "_018"), # below pov female <5
         paste0("B17001", sfx, "_019"),
         paste0("B17001", sfx, "_020"),
         paste0("B17001", sfx, "_021"),
@@ -121,25 +121,25 @@ get_acs_vars <- function(groups = c("white", "black", "hispanic", "aapi", "nativ
         paste0("B17001", sfx, "_059"),
 
         # Educational attainment (25+)
-        paste0("C15002", sfx, "_001"),  # total
-        paste0("C15002", sfx, "_003"),  # male less than HS
-        paste0("C15002", sfx, "_006"),  # male bachelor's+
-        paste0("C15002", sfx, "_008"),  # female less than HS
-        paste0("C15002", sfx, "_011"),  # female bachelor's+
+        paste0("C15002", sfx, "_001"), # total
+        paste0("C15002", sfx, "_003"), # male less than HS
+        paste0("C15002", sfx, "_006"), # male bachelor's+
+        paste0("C15002", sfx, "_008"), # female less than HS
+        paste0("C15002", sfx, "_011"), # female bachelor's+
 
         # Employment status (16-64)
-        paste0("C23002", sfx, "_006"),  # male civilian labor force
-        paste0("C23002", sfx, "_008"),  # male unemployed
-        paste0("C23002", sfx, "_019"),  # female civilian labor force
-        paste0("C23002", sfx, "_021"),  # female unemployed
+        paste0("C23002", sfx, "_006"), # male civilian labor force
+        paste0("C23002", sfx, "_008"), # male unemployed
+        paste0("C23002", sfx, "_019"), # female civilian labor force
+        paste0("C23002", sfx, "_021"), # female unemployed
 
         # Disability (18-64)
-        paste0("B18101", sfx, "_005"),  # total 18-64
-        paste0("B18101", sfx, "_006"),  # with disability 18-64
+        paste0("B18101", sfx, "_005"), # total 18-64
+        paste0("B18101", sfx, "_006"), # with disability 18-64
 
         # Health insurance (19-64)
-        paste0("C27001", sfx, "_005"),  # total 19-64
-        paste0("C27001", sfx, "_007")   # uninsured 19-64
+        paste0("C27001", sfx, "_005"), # total 19-64
+        paste0("C27001", sfx, "_007") # uninsured 19-64
       )
     }
   }

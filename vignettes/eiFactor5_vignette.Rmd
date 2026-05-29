@@ -94,30 +94,37 @@ knitr::kable(nm_table, caption = "Factor 5 SES Comparison: New Mexico Counties")
 ```{r nm-compare}
 # Detailed pairwise comparison: White vs Native
 nm_native <- f5_compare(nm_dat,
-                        ref_group = "white",
-                        compare_group = "native")
-knitr::kable(nm_native[, c("label", "ref_mean", "compare_mean",
-                            "diff", "t_stat", "p_value", "significant")],
-             digits = 3,
-             caption = "White vs. Native American: Pairwise Tests")
+  ref_group = "white",
+  compare_group = "native"
+)
+knitr::kable(
+  nm_native[, c(
+    "label", "ref_mean", "compare_mean",
+    "diff", "t_stat", "p_value", "significant"
+  )],
+  digits = 3,
+  caption = "White vs. Native American: Pairwise Tests"
+)
 ```
 
 ### Bar Chart
 
 ```{r nm-plot, fig.width = 8, fig.height = 6}
 f5_plot(nm_dat,
-        ref_group = "white",
-        compare_groups = c("hispanic", "native"),
-        type = "bar")
+  ref_group = "white",
+  compare_groups = c("hispanic", "native"),
+  type = "bar"
+)
 ```
 
 ### Dot Plot
 
 ```{r nm-dot, fig.width = 8, fig.height = 6}
 f5_plot(nm_dat,
-        ref_group = "white",
-        compare_groups = c("hispanic", "native"),
-        type = "dot")
+  ref_group = "white",
+  compare_groups = c("hispanic", "native"),
+  type = "dot"
+)
 ```
 
 ## Example 2: Northern New Mexico Regional Analysis
@@ -152,7 +159,8 @@ north_table <- f5_table(
   compare_groups = c("hispanic", "native")
 )
 knitr::kable(north_table,
-             caption = "Factor 5 SES Comparison: Northern NM Tracts")
+  caption = "Factor 5 SES Comparison: Northern NM Tracts"
+)
 ```
 
 ### Choropleth Maps
@@ -161,36 +169,40 @@ Map the poverty rate for Native Americans across northern NM tracts:
 
 ```{r north-map-poverty, fig.width = 8, fig.height = 6}
 f5_map(north_dat,
-       indicator = "pct_below_poverty",
-       group = "native",
-       title = "Native American Poverty Rate\nNorthern New Mexico")
+  indicator = "pct_below_poverty",
+  group = "native",
+  title = "Native American Poverty Rate\nNorthern New Mexico"
+)
 ```
 
 Map educational attainment for Hispanics:
 
 ```{r north-map-education, fig.width = 8, fig.height = 6}
 f5_map(north_dat,
-       indicator = "pct_less_hs",
-       group = "hispanic",
-       title = "Hispanic Pct. Less than HS Diploma\nNorthern New Mexico")
+  indicator = "pct_less_hs",
+  group = "hispanic",
+  title = "Hispanic Pct. Less than HS Diploma\nNorthern New Mexico"
+)
 ```
 
 Map unemployment for White population as a comparison:
 
 ```{r north-map-unemp, fig.width = 8, fig.height = 6}
 f5_map(north_dat,
-       indicator = "pct_unemployed",
-       group = "white",
-       title = "White Unemployment Rate\nNorthern New Mexico")
+  indicator = "pct_unemployed",
+  group = "white",
+  title = "White Unemployment Rate\nNorthern New Mexico"
+)
 ```
 
 ### Bar Chart: Northern NM
 
 ```{r north-bar, fig.width = 8, fig.height = 6}
 f5_plot(north_dat,
-        ref_group = "white",
-        compare_groups = c("hispanic", "native"),
-        type = "bar")
+  ref_group = "white",
+  compare_groups = c("hispanic", "native"),
+  type = "bar"
+)
 ```
 
 ## Example 3: Mississippi White vs. Black
