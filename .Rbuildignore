@@ -10,3 +10,5 @@
 ^assignment_4\.Rmd$
 ^README\.md$
 ^\.gitignore$
+^Icon
+^\.github$
