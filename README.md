@@ -1,4 +1,6 @@
 # eiFactor5
+[![R build status](https://github.com/RPVote/eiFactor5/workflows/R-CMD-check/badge.svg)](https://github.com/RPVote/eiFactor5/actions?workflow=R-CMD-check)
+[![Style status](https://github.com/RPVote/eiFactor5/workflows/Styler/badge.svg)](https://github.com/RPVote/eiFactor5/actions?workflow=Styler)
 
 Totality of Circumstances Factor 5 Analysis Using Census ACS Data
 
