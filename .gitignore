@@ -4,3 +4,18 @@
 .Ruserdata
 *.Rproj
 .DS_Store
+
+# Development scripts and data (not part of the R package)
+*.xlsx
+*.docx
+*.rtf
+Icon*
+eiFactor5.R
+acs_vars*.R
+ses_analysis.R
+factor5_*.R
+function_example.R
+assignment_4.Rmd
+analysis/
+georgia_code/
+inst/doc
