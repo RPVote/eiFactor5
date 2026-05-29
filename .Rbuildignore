@@ -12,3 +12,8 @@
 ^\.gitignore$
 ^Icon
 ^\.github$
+^RC_acs_ref_tables\.xlsx$
+^ReadME\.docx$
+^acs_2020\.xlsx$
+^analysis$
+^LICENSE$

@@ -49,9 +49,11 @@ dat <- f5_fetch(state = "MS", geography = "county")
 f5_table(dat, ref_group = "white", compare_groups = "black")
 
 # Multiple comparison groups, select indicators
-f5_table(dat, ref_group = "white",
-         compare_groups = c("black", "hispanic"),
-         indicators = c("med_hh_inc", "pct_below_poverty", "pct_bachelor"))
+f5_table(dat,
+  ref_group = "white",
+  compare_groups = c("black", "hispanic"),
+  indicators = c("med_hh_inc", "pct_below_poverty", "pct_bachelor")
+)
 }
 
 }

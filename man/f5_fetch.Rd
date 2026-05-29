@@ -78,15 +78,19 @@ Requires a Census API key set via
 \examples{
 \dontrun{
 # All NM counties, White vs Black vs Hispanic
-dat <- f5_fetch(state = "NM", geography = "county", year = 2022,
-                groups = c("white", "black", "hispanic"))
+dat <- f5_fetch(
+  state = "NM", geography = "county", year = 2022,
+  groups = c("white", "black", "hispanic")
+)
 
 # National, state-level, all 5 groups
 dat <- f5_fetch(geography = "state", year = 2022)
 
 # Specific counties, tract-level with geometry
-dat <- f5_fetch(state = "NM", county = c("049", "039"),
-                geography = "tract", geometry = TRUE)
+dat <- f5_fetch(
+  state = "NM", county = c("049", "039"),
+  geography = "tract", geometry = TRUE
+)
 }
 
 }

@@ -1,7 +1,7 @@
 #' Compute all 12 SES indicators for a single racial group
 #' @param data Wide-format ACS data from tidycensus
 #' @param group Group name (white, black, hispanic, aapi, native)
-#' @return data.frame with 12 indicator columns named {indicator}_{group}
+#' @return data.frame with 12 indicator columns named \code{indicator_group}
 #' @keywords internal
 compute_group <- function(data, group) {
   suffix_map <- list(

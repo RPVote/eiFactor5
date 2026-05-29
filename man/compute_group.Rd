@@ -12,7 +12,7 @@ compute_group(data, group)
 \item{group}{Group name (white, black, hispanic, aapi, native)}
 }
 \value{
-data.frame with 12 indicator columns named {indicator}_{group}
+data.frame with 12 indicator columns named \code{indicator_group}
 }
 \description{
 Compute all 12 SES indicators for a single racial group

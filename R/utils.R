@@ -1,3 +1,6 @@
+#' @importFrom stats na.omit
+NULL
+
 #' Get the ACS column suffix for an estimate variable
 #' @keywords internal
 e_col <- function(var_code) {

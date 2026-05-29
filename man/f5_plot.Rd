@@ -37,9 +37,11 @@ values across racial/ethnic groups.
 \dontrun{
 dat <- f5_fetch(state = "MS", geography = "county")
 f5_plot(dat, ref_group = "white", compare_groups = "black")
-f5_plot(dat, ref_group = "white",
-        compare_groups = c("black", "hispanic"),
-        type = "dot")
+f5_plot(dat,
+  ref_group = "white",
+  compare_groups = c("black", "hispanic"),
+  type = "dot"
+)
 }
 
 }

@@ -33,9 +33,11 @@ for mapping.
 }
 \examples{
 \dontrun{
-dat <- f5_fetch(state = "NM", county = c("049","039","055"),
-                geography = "tract", geometry = TRUE,
-                groups = c("white", "native"))
+dat <- f5_fetch(
+  state = "NM", county = c("049", "039", "055"),
+  geography = "tract", geometry = TRUE,
+  groups = c("white", "native")
+)
 f5_map(dat, indicator = "pct_below_poverty", group = "native")
 }
 

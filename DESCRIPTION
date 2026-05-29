@@ -21,10 +21,8 @@ Depends:
 Imports:
     tidycensus,
     dplyr,
-    tidyr,
     ggplot2,
     sf,
-    tigris,
     stats,
     rlang
 Suggests:
