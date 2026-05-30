@@ -7,12 +7,11 @@ Authors@R: c(
     person("Rachel", "Carroll", role = "ctb"))
 Description: Retrieves American Community Survey (ACS) data via the Census API
     and computes socioeconomic status (SES) indicators by racial/ethnic group for
-    Voting Rights Act Section 2 "totality of circumstances" Factor 5 analysis.
+    Voting Rights Act Section 2 totality of circumstances Factor 5 analysis.
     Supports comparisons across White, Black, Hispanic, AAPI, and Native American
     populations at national, state, county, tract, and congressional district
     levels. Provides publication-ready comparison tables with statistical
-    significance testing, bar/dot chart visualizations, and choropleth maps.
-    Part of the eiCompare ecosystem for voting rights analysis.
+    significance testing, and bar/dot chart visualizations.
 License: GPL-3
 URL: https://github.com/RPVote/eiFactor5
 BugReports: https://github.com/RPVote/eiFactor5/issues
